@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
 
-	"github.com/TheL1ne/md2pdf/markdown"
+	log "github.com/AlbinoGeek/logxi/v1"
+	"github.com/AlbinoGeek/md2pdf/markdown"
 )
 
 func init() {
@@ -23,9 +23,9 @@ func init() {
 
 func main() {
 	var (
-		css   = flag.String("css", "", "css file")
-		title = flag.String("title", "md2pdf", "document title")
-		html  = flag.Bool("html", false, "convert html only")
+		css   = flag.String("css", "", "PDF User Stylesheet")
+		title = flag.String("title", "md2pdf", "PDF Document Title")
+		html  = flag.Bool("html", false, "Save HTML instead of PDF")
 	)
 	flag.Parse()
 
@@ -35,48 +35,61 @@ func main() {
 	}
 
 	var r io.ReadCloser
-	var out string
+	var outPath string
 	if len(flag.Args()) > 1 {
 		f, err := os.Open(flag.Arg(0))
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("failed to open input file", "error", err)
 		}
 		r = f
-		out = flag.Arg(1)
+		outPath = flag.Arg(1)
 	} else {
 		r = os.Stdin
-		out = flag.Arg(0)
+		outPath = flag.Arg(0)
 	}
 	defer func() { r.Close() }()
 
 	text, err := ioutil.ReadAll(r)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to read input file", "error", err)
 	}
 
 	md := markdown.NewMarkdown(text)
 
 	opts := []string{"--print-media-type"}
 	if *css != "" {
-		var cssUrl string
+		var cssPath string
 		u, _ := url.Parse(*css)
-		if u.Scheme != "http" && u.Scheme != "https" {
-			abs, _ := filepath.Abs(*css)
-			cssUrl = "file://" + abs
+		if u.Scheme == "http" || u.Scheme == "https" {
+			f, e := ioutil.TempFile(os.TempDir(), "md2pdf-css")
+			// defer os.Remove(f.Name())
+			if e == nil {
+				cssPath = f.Name()
+			}
+
+			log.Warn("wkthml requires local file, downloading remote stylesheet",
+				"provided URL", *css, "local file", cssPath)
+
+			if err := download(u.String(), cssPath); err != nil {
+				log.Fatal("failed to download remote stylesheet file")
+			}
+
+			cssPath = "file://" + cssPath
 		} else {
-			cssUrl = u.String()
+			abs, _ := filepath.Abs(*css)
+			cssPath = "file://" + abs
 		}
-		opts = append(opts, "--user-style-sheet", filepath.ToSlash(cssUrl))
+		opts = append(opts, "--user-style-sheet", filepath.ToSlash(cssPath))
 	}
 
 	if *html {
-		h := md.ToHtml(*title, true)
-		ioutil.WriteFile(out, h, 0644)
+		if err := ioutil.WriteFile(outPath, md.ToHtml(*title, true), 0644); err != nil {
+			log.Fatal("failure writing output file", "error", err)
+		}
 		return
 	}
 
-	err = md.ToPdf(out, *title, opts...)
-	if err != nil {
-		log.Fatal(err)
+	if err = md.ToPdf(outPath, *title, opts...); err != nil {
+		log.Fatal("failure in HtmlToPdf", "error", err)
 	}
 }
