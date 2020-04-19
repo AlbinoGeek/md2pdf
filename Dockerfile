@@ -5,7 +5,7 @@ RUN yum -y install http://downloads.sourceforge.net/project/wkhtmltopdf/0.12.1/w
 RUN yum -y install git golang
 
 ENV GOPATH /usr/local
-RUN go get github.com/hayajo/md2pdf
+RUN go get github.com/AlbinoGeek/md2pdf
 
 ENTRYPOINT ["md2pdf"]
 

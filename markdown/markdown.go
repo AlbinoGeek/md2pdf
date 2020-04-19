@@ -1,7 +1,7 @@
 package markdown
 
 import (
-	"github.com/TheL1ne/md2pdf/htmltopdf"
+	"github.com/AlbinoGeek/md2pdf/htmltopdf"
 	"github.com/russross/blackfriday"
 )
 
