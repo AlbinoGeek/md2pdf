@@ -6,10 +6,9 @@ Converts a MarkDown file to a PDF file, with an option to add an external styles
 ## Usage
 
 ```bash
-MD2PDFSRC="github.com/AlbinoGeek/md2pdf"
-go install "$MD2PDFSRC"
-cd "$GOPATH/$MD2PDFSRC"
-md2pdf -css markdown.css README.{md,pdf}
+MD2PDFSRC="github.com/AlbinoGeek/md2pdf" \
+go install "$MD2PDFSRC" && cd "$GOPATH/src/$MD2PDFSRC" && \
+"$GOPATH/bin/md2pdf" -css markdown.css README.{md,pdf}
 ```
 
 ## Requirements
