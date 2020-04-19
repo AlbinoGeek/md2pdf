@@ -60,7 +60,7 @@ func main() {
 	if *css != "" {
 		var cssUrl string
 		u, _ := url.Parse(*css)
-		if u.Scheme != "http" || u.Scheme != "https" {
+		if u.Scheme != "http" && u.Scheme != "https" {
 			abs, _ := filepath.Abs(*css)
 			cssUrl = "file://" + abs
 		} else {
