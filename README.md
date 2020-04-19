@@ -1,16 +1,24 @@
 md2pdf
 ======
 
-Convert a Markdown to PDF.
+Converts a MarkDown file to a PDF file, with an option to add an external stylesheet.
 
 ## Usage
 
-    $ go get github.com/hayajo/md2pdf
-    $ md2pdf --css=main.css target.md output.pdf
+```bash
+$ go get github.com/AlbinoGeek/md2pdf
+$ md2pdf -css your-stylesheet.css source.md target.pdf
+```
 
-## Requires
+## Requirements
 
 [wkhtmltopdf/wkhtmltopdf](https://github.com/wkhtmltopdf/wkhtmltopdf)
+
+### Instructions for Fedora 30/31
+
+```bash
+$ sudo dnf install wkhtmltopdf
+```
 
 ## See Also
 
